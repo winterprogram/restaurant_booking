@@ -1,0 +1,75 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Restaurant {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  location String
+  cuisine  String
+  rating   Float
+  menus    Menu[]
+}
+
+model Menu {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String     @db.ObjectId
+  items        MenuItem[]
+  Restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model MenuItem {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  price  Float
+  menuId String @db.ObjectId
+  Menu   Menu   @relation(fields: [menuId], references: [id])
+}
+
+model User {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  email String @unique
+  name  String
+  carts Cart[]
+}
+
+model Cart {
+  id     String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId String     @db.ObjectId
+  items  CartItem[]
+  total  Float
+  tax    Float
+  User   User       @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  price    Float
+  quantity Int
+  cartId   String @db.ObjectId
+  Cart     Cart   @relation(fields: [cartId], references: [id])
+}
+
+model Order {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String      @db.ObjectId
+  items     OrderItem[]
+  total     Float
+  tax       Float
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  price    Float
+  quantity Int
+  orderId  String @db.ObjectId
+  Order    Order  @relation(fields: [orderId], references: [id])
+}
